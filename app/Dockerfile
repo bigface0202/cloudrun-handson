@@ -2,7 +2,7 @@
 # Building Vue.js
 FROM node:17-alpine3.14 as vue-build
 
-COPY ./vue /app
+COPY ./sample-app /app
 WORKDIR /app
 RUN npm install
 
