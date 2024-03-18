@@ -11,20 +11,24 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: 'Authenticate to Google Cloud'
+      - name: Authenticate to Google Cloud
         id: auth
         uses: 'google-github-actions/auth@v1'
         with:
           workload_identity_provider: 'projects/1052276836905/locations/global/workloadIdentityPools/github-actions-pool/providers/github'
           service_account: 'github-actions-sa@ksst-project-one.iam.gserviceaccount.com'
       
-      - name: 'Set up Cloud SDK'
+      - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v1'
         with:
           version: '>= 379.0.0'
+
+      - name: Authenticate Docker
+        run: |-
+          gcloud auth configure-docker asia-northeast1-docker.pkg.dev
       
       - name: Build, tag and push container
         id: build-image
