@@ -25,12 +25,15 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v1'
         with:
           version: '>= 379.0.0'
-
-      - name: Auth & Build & Push
-        run: |-
-          gcloud auth configure-docker asia-northeast1-docker.pkg.dev
-          docker build --platform linux/amd64 -t asia-northeast1-docker.pkg.dev/ksst-project-one/my-repository/sample-app-kishi:latest ./app
-          docker push asia-northeast1-docker.pkg.dev/ksst-project-one/my-repository/sample-app-kishi:latest
+      
+      - name: Build, tag and push container
+        id: build-image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./app
+          push: true
+          tags: |
+            asia-northeast1-docker.pkg.dev/ksst-project-one/my-repository/sample-app-kishi:latest
 
       - name: Deploy
         run: gcloud run deploy veronica-line-bot --image asia-northeast1-docker.pkg.dev/ksst-project-one/my-repository/sample-app-kishi:latest --platform managed --region asia-northeast1 --allow-unauthenticated --max-instances 1 --memory 512Mi
