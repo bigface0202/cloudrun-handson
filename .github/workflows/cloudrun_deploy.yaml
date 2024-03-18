@@ -18,7 +18,6 @@ jobs:
         id: auth
         uses: 'google-github-actions/auth@v2'
         with:
-          token_format: 'access_token'
           workload_identity_provider: 'projects/1052276836905/locations/global/workloadIdentityPools/github-actions-pool/providers/github'
           service_account: 'github-actions-sa@ksst-project-one.iam.gserviceaccount.com'
       
@@ -26,23 +25,12 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v1'
         with:
           version: '>= 379.0.0'
-      
-      - name: Docker Auth
-        id: docker-auth
-        uses: 'docker/login-action@v1'
-        with:
-          username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.access_token }}'
-          registry: 'asia-northeast1-docker.pkg.dev'
 
-      - name: Build & Push
-        id: build-image
-        uses: docker/build-push-action@v3
-        with:
-          context: ./app
-          push: true
-          tags: |
-            asia-northeast1-docker.pkg.dev/ksst-project-one/my-repository/sample-app-kishi:latest
+      - name: Auth & Build & Push
+        run: |-
+          gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+          docker build --platform linux/amd64 -t asia-northeast1-docker.pkg.dev/ksst-project-one/my-repository/sample-app-kishi:latest .
+          docker push asia-northeast1-docker.pkg.dev/ksst-project-one/my-repository/sample-app-kishi:latest
 
       - name: Deploy
         run: gcloud run deploy veronica-line-bot --image asia-northeast1-docker.pkg.dev/ksst-project-one/my-repository/sample-app-kishi:latest --platform managed --region asia-northeast1 --allow-unauthenticated --max-instances 1 --memory 512Mi
